@@ -1,5 +1,5 @@
+import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import create from "zustand";
 import toast from "react-hot-toast";
 
 export const useInvoiceStore = create(

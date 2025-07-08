@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
-import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { Eye, EyeOff, FileText, Lock, Mail } from "lucide-react";
 
 const LoginForm = ({ onSwitchToRegister  }) => {
   const [formData, setFormData] = useState({ email: "", password: "" });
