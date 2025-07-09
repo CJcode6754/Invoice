@@ -12,7 +12,7 @@ export const useInvoiceStore = create(
         const { invoices, nextInvoiceNumber } = get();
         const newInvoice = {
           id: Date.now().toString(),
-          invoiceNumber: `INVOICE-${String(nextInvoiceNumber).padStart(4, 0)}`,
+          invoiceNumber: `INV-${String(nextInvoiceNumber).padStart(4, 0)}`,
           ...invoice,
           createAt: new Date().toISOString(),
         };

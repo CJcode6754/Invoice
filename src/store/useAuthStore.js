@@ -1,6 +1,7 @@
 import { persist } from "zustand/middleware";
 import { create } from "zustand";
 import toast from "react-hot-toast";
+import bcrypt from "bcryptjs";
 
 export const useAuthStore = create(
   persist(
@@ -9,7 +10,7 @@ export const useAuthStore = create(
       users: [],
       isAuthenticated: false,
 
-      register: (userData) => {
+      register: async (userData) => {
         const { users } = get();
         const existingUser = users.find((u) => u.email === userData.email);
 
@@ -18,9 +19,12 @@ export const useAuthStore = create(
           return false;
         }
 
+        const hashedPassword = await bcrypt.hash(userData.password, 10);
+
         const newUser = {
           id: Date.now.toString(),
           ...userData,
+          password: hashedPassword,
           createdAt: new Date().toISOString(),
         };
 
@@ -34,14 +38,18 @@ export const useAuthStore = create(
         return true;
       },
 
-      login: (email, password) => {
+      login: async (email, password) => {
         const { users } = get();
 
-        const user = users.find(
-          (u) => u.email === email && u.password === password
-        );
+        const user = users.find((u) => u.email === email);
+        if (!user) {
+          toast.error("Invalid credentials");
+          return false;
+        }
 
-        if (user) {
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (isMatch) {
           set({ user, isAuthenticated: true });
           toast.success("Login Successfully");
           return true;

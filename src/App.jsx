@@ -11,7 +11,7 @@ const App = () => {
   const [currentView, setCurrentView] = useState('login');
   const [editingInvoice, setEditingInvoice] = useState(null);
   const { isAuthenticated } = useAuthStore();
-  const { addInvoices, updateInvoice } = useInvoiceStore();
+  const { addInvoices, updateInvoice, nextInvoiceNumber } = useInvoiceStore();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -59,6 +59,7 @@ const App = () => {
         invoice={editingInvoice}
         onSave={handleSaveInvoice}
         onCancel={handleCancelForm}
+        nextInvoiceNumber={nextInvoiceNumber}
       />
     );
   }

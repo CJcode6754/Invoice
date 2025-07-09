@@ -1,18 +1,18 @@
-import { Calendar, Plus, Save, User, X } from 'lucide-react';
-import React, { useState } from 'react'
+import { Calendar, Plus, Save, Trash, Trash2, User, X } from "lucide-react";
+import React, { useState } from "react";
 
-const InvoiceForm = ({ invoice, onSave, onCancel }) => {
+const InvoiceForm = ({ invoice, onSave, onCancel, nextInvoiceNumber  }) => {
   const [formData, setFormData] = useState({
-    date: invoice?.date || new Date().toISOString().split('T')[0],
-    customerName: invoice?.customerName || '',
-    products: invoice?.products || [{ name: '', quantity: 1, price: 0 }]
+    date: invoice?.date || new Date().toISOString().split("T")[0],
+    customerName: invoice?.customerName || "",
+    products: invoice?.products || [{ name: "", quantity: 1, price: 0 }],
   });
   const [errors, setErrors] = useState({});
 
   const addProduct = () => {
     setFormData({
       ...formData,
-      products: [...formData.products, { name: '', quantity: 1, price: 0 }]
+      products: [...formData.products, { name: "", quantity: 1, price: 0 }],
     });
   };
 
@@ -24,45 +24,47 @@ const InvoiceForm = ({ invoice, onSave, onCancel }) => {
   };
 
   const updateProduct = (index, field, value) => {
-    const updated = formData.products.map((product, i) => 
+    const updated = formData.products.map((product, i) =>
       i === index ? { ...product, [field]: value } : product
     );
     setFormData({ ...formData, products: updated });
   };
 
   const calculateSubtotal = (product) => {
-    return (product.quantity * product.price) || 0;
+    return product.quantity * product.price || 0;
   };
 
   const calculateTotal = () => {
-    return formData.products.reduce((total, product) => 
-      total + calculateSubtotal(product), 0
+    return formData.products.reduce(
+      (total, product) => total + calculateSubtotal(product),
+      0
     );
   };
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.customerName) {
-      newErrors.customerName = 'Customer name is required';
+      newErrors.customerName = "Customer name is required";
     }
-    
+
     if (!formData.date) {
-      newErrors.date = 'Date is required';
+      newErrors.date = "Date is required";
     }
-    
+
     formData.products.forEach((product, index) => {
       if (!product.name) {
-        newErrors[`product_${index}_name`] = 'Product name is required';
+        newErrors[`product_${index}_name`] = "Product name is required";
       }
       if (!product.quantity || product.quantity <= 0) {
-        newErrors[`product_${index}_quantity`] = 'Quantity must be greater than 0';
+        newErrors[`product_${index}_quantity`] =
+          "Quantity must be greater than 0";
       }
       if (!product.price || product.price <= 0) {
-        newErrors[`product_${index}_price`] = 'Price must be greater than 0';
+        newErrors[`product_${index}_price`] = "Price must be greater than 0";
       }
     });
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -72,7 +74,7 @@ const InvoiceForm = ({ invoice, onSave, onCancel }) => {
     if (validateForm()) {
       const invoiceData = {
         ...formData,
-        total: calculateTotal()
+        total: calculateTotal(),
       };
       onSave(invoiceData);
     }
@@ -84,7 +86,7 @@ const InvoiceForm = ({ invoice, onSave, onCancel }) => {
         <div className="bg-white rounded-xl shadow-lg p-8">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-bold text-gray-900">
-              {invoice ? 'Edit Invoice' : 'Create New Invoice'}
+              {invoice ? "Edit Invoice" : "Create New Invoice"}
             </h2>
             <button
               onClick={onCancel}
@@ -93,9 +95,21 @@ const InvoiceForm = ({ invoice, onSave, onCancel }) => {
               <X className="h-6 w-6" />
             </button>
           </div>
-          
+
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Invoice Number
+                </label>
+                <input
+                  type="text"
+                  value={`INV-${String(nextInvoiceNumber).padStart(4, '0')}`}
+                  disabled
+                  className="w-full px-4 py-3 border rounded-lg bg-gray-100 text-gray-500"
+                />
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Invoice Date
@@ -105,15 +119,19 @@ const InvoiceForm = ({ invoice, onSave, onCancel }) => {
                   <input
                     type="date"
                     value={formData.date}
-                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, date: e.target.value })
+                    }
                     className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${
-                      errors.date ? 'border-red-500' : 'border-gray-300'
+                      errors.date ? "border-red-500" : "border-gray-300"
                     }`}
                   />
                 </div>
-                {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
+                {errors.date && (
+                  <p className="text-red-500 text-sm mt-1">{errors.date}</p>
+                )}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Customer Name
@@ -123,20 +141,28 @@ const InvoiceForm = ({ invoice, onSave, onCancel }) => {
                   <input
                     type="text"
                     value={formData.customerName}
-                    onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, customerName: e.target.value })
+                    }
                     className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${
-                      errors.customerName ? 'border-red-500' : 'border-gray-300'
+                      errors.customerName ? "border-red-500" : "border-gray-300"
                     }`}
                     placeholder="Enter customer name"
                   />
                 </div>
-                {errors.customerName && <p className="text-red-500 text-sm mt-1">{errors.customerName}</p>}
+                {errors.customerName && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.customerName}
+                  </p>
+                )}
               </div>
             </div>
-            
+
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Products</h3>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Products
+                </h3>
                 <button
                   type="button"
                   onClick={addProduct}
@@ -146,7 +172,7 @@ const InvoiceForm = ({ invoice, onSave, onCancel }) => {
                   Add Product
                 </button>
               </div>
-              
+
               <div className="space-y-4">
                 {formData.products.map((product, index) => (
                   <div key={index} className="bg-gray-50 p-4 rounded-lg">
@@ -158,17 +184,23 @@ const InvoiceForm = ({ invoice, onSave, onCancel }) => {
                         <input
                           type="text"
                           value={product.name}
-                          onChange={(e) => updateProduct(index, 'name', e.target.value)}
+                          onChange={(e) =>
+                            updateProduct(index, "name", e.target.value)
+                          }
                           className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${
-                            errors[`product_${index}_name`] ? 'border-red-500' : 'border-gray-300'
+                            errors[`product_${index}_name`]
+                              ? "border-red-500"
+                              : "border-gray-300"
                           }`}
                           placeholder="Enter product name"
                         />
                         {errors[`product_${index}_name`] && (
-                          <p className="text-red-500 text-sm mt-1">{errors[`product_${index}_name`]}</p>
+                          <p className="text-red-500 text-sm mt-1">
+                            {errors[`product_${index}_name`]}
+                          </p>
                         )}
                       </div>
-                      
+
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Quantity
@@ -177,16 +209,26 @@ const InvoiceForm = ({ invoice, onSave, onCancel }) => {
                           type="number"
                           min="1"
                           value={product.quantity}
-                          onChange={(e) => updateProduct(index, 'quantity', parseInt(e.target.value) || 0)}
+                          onChange={(e) =>
+                            updateProduct(
+                              index,
+                              "quantity",
+                              parseInt(e.target.value) || 0
+                            )
+                          }
                           className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${
-                            errors[`product_${index}_quantity`] ? 'border-red-500' : 'border-gray-300'
+                            errors[`product_${index}_quantity`]
+                              ? "border-red-500"
+                              : "border-gray-300"
                           }`}
                         />
                         {errors[`product_${index}_quantity`] && (
-                          <p className="text-red-500 text-sm mt-1">{errors[`product_${index}_quantity`]}</p>
+                          <p className="text-red-500 text-sm mt-1">
+                            {errors[`product_${index}_quantity`]}
+                          </p>
                         )}
                       </div>
-                      
+
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Price
@@ -196,16 +238,26 @@ const InvoiceForm = ({ invoice, onSave, onCancel }) => {
                           min="0"
                           step="0.01"
                           value={product.price}
-                          onChange={(e) => updateProduct(index, 'price', parseFloat(e.target.value) || 0)}
+                          onChange={(e) =>
+                            updateProduct(
+                              index,
+                              "price",
+                              parseFloat(e.target.value) || 0
+                            )
+                          }
                           className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${
-                            errors[`product_${index}_price`] ? 'border-red-500' : 'border-gray-300'
+                            errors[`product_${index}_price`]
+                              ? "border-red-500"
+                              : "border-gray-300"
                           }`}
                         />
                         {errors[`product_${index}_price`] && (
-                          <p className="text-red-500 text-sm mt-1">{errors[`product_${index}_price`]}</p>
+                          <p className="text-red-500 text-sm mt-1">
+                            {errors[`product_${index}_price`]}
+                          </p>
                         )}
                       </div>
-                      
+
                       <div className="flex items-end justify-between">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -215,7 +267,7 @@ const InvoiceForm = ({ invoice, onSave, onCancel }) => {
                             ${calculateSubtotal(product).toFixed(2)}
                           </p>
                         </div>
-                        
+
                         {formData.products.length > 1 && (
                           <button
                             type="button"
@@ -231,15 +283,17 @@ const InvoiceForm = ({ invoice, onSave, onCancel }) => {
                 ))}
               </div>
             </div>
-            
+
             <div className="border-t pt-6">
               <div className="flex justify-between items-center mb-6">
-                <span className="text-xl font-semibold text-gray-900">Total Amount:</span>
+                <span className="text-xl font-semibold text-gray-900">
+                  Total Amount:
+                </span>
                 <span className="text-2xl font-bold text-indigo-600">
                   ${calculateTotal().toFixed(2)}
                 </span>
               </div>
-              
+
               <div className="flex gap-4">
                 <button
                   type="submit"
@@ -248,7 +302,7 @@ const InvoiceForm = ({ invoice, onSave, onCancel }) => {
                   <Save className="h-5 w-5" />
                   Save Invoice
                 </button>
-                
+
                 <button
                   type="button"
                   onClick={onCancel}
@@ -265,4 +319,4 @@ const InvoiceForm = ({ invoice, onSave, onCancel }) => {
   );
 };
 
-export default InvoiceForm
+export default InvoiceForm;
